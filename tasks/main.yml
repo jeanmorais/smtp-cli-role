@@ -1,0 +1,34 @@
+---
+
+- name: Install EPEL release repository
+  become: true
+  package:
+    name: epel-release
+    state: present
+
+- name: Install dependencies
+  yum:
+    state: latest
+    name:
+      - perl-IO-Socket-SSL
+      - perl-MIME-Lite
+      - perl-IO-Socket-INET6
+      - perl-Digest-HMAC
+      - perl-TermReadKey
+      - perl-File-LibMagic
+
+- name: Download smtp-cli from remote repository (specific version)
+  become: true
+  get_url:
+    url: "https://raw.githubusercontent.com/mludvig/smtp-cli/v{{ smtp_cli_version }}/smtp-cli"
+    dest: "/usr/bin/smtp-cli"
+    mode: 0755
+  when: smtp_cli_version is regex('^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$')
+
+- name: Download smtp-cli from remote repository (latest)
+  become: true
+  get_url:
+    url: "https://raw.githubusercontent.com/mludvig/smtp-cli/HEAD/smtp-cli"
+    dest: "/usr/bin/smtp-cli"
+    mode: 0755
+  when: smtp_cli_version == "latest"
